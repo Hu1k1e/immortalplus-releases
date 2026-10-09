@@ -40,6 +40,15 @@ def find_dota_window_rect() -> tuple[int, int, int, int] | None:
     for title in _DOTA_WINDOW_TITLES:
         hwnd = win32gui.FindWindow(None, title)
         if hwnd and win32gui.IsWindowVisible(hwnd) and not win32gui.IsIconic(hwnd):   # a minimised window has nothing to read
+            # The part the game draws into: in a bordered window that leaves out the title bar and frame (which would shift every region),
+            # in fullscreen it is the whole screen.
+            try:
+                cl, ct, cr, cb = win32gui.GetClientRect(hwnd)
+                if cr - cl > 0 and cb - ct > 0:
+                    x, y = win32gui.ClientToScreen(hwnd, (0, 0))
+                    return (x, y, cr - cl, cb - ct)
+            except Exception:
+                pass
             left, top, right, bottom = win32gui.GetWindowRect(hwnd)
             width, height = right - left, bottom - top
             if width > 0 and height > 0:

@@ -25,6 +25,9 @@ public class DotaFinder {
   [DllImport("user32.dll", CharSet = CharSet.Unicode)] public static extern int GetWindowText(IntPtr h, StringBuilder s, int n);
   [DllImport("user32.dll", CharSet = CharSet.Unicode)] public static extern int GetClassName(IntPtr h, StringBuilder s, int n);
   [DllImport("user32.dll")] public static extern bool GetWindowRect(IntPtr h, out RECT r);
+  [DllImport("user32.dll")] public static extern bool GetClientRect(IntPtr h, out RECT r);
+  [DllImport("user32.dll")] public static extern bool ClientToScreen(IntPtr h, ref POINT p);
+  public struct POINT { public int X, Y; }
   [DllImport("user32.dll")] public static extern uint GetWindowThreadProcessId(IntPtr h, out uint pid);
   public struct RECT { public int L, T, R, B; }
   public static string Find() {
@@ -38,14 +41,19 @@ public class DotaFinder {
       // The game window is titled "Dota 2" with the SDL window class; the class
       // check keeps an Explorer folder or browser tab with that name from matching.
       if (sb.ToString() == "Dota 2" && cls.ToString() == "SDL_app") {
+        // The client area is what the game draws into: in a bordered window the title bar and frame are left out, in fullscreen it is the whole screen.
         RECT r; GetWindowRect(h, out r);
+        int left = r.L, top = r.T, width = r.R - r.L, height = r.B - r.T;
+        RECT c;
+        POINT origin = new POINT();
+        if (GetClientRect(h, out c) && c.R - c.L > 0 && c.B - c.T > 0 && ClientToScreen(h, ref origin)) { left = origin.X; top = origin.Y; width = c.R - c.L; height = c.B - c.T; }
         long started = 0;
         try {
           uint pid; GetWindowThreadProcessId(h, out pid);
           var t = System.Diagnostics.Process.GetProcessById((int)pid).StartTime.ToUniversalTime();
           started = (long)(t - new DateTime(1970, 1, 1, 0, 0, 0, DateTimeKind.Utc)).TotalMilliseconds;
         } catch { }
-        res = r.L + "," + r.T + "," + (r.R - r.L) + "," + (r.B - r.T) + "," + started;
+        res = left + "," + top + "," + width + "," + height + "," + started;
         return false;
       }
       return true;
