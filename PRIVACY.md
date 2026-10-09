@@ -33,9 +33,12 @@ None of this is a picture. None of it is sent to the Immortal+ service.
 
 ## What the app exchanges with the Immortal+ service
 
-- **Sign-in:** through Steam (Steam's own page; your password never reaches the app). The app learns your public account number.
-- **Match and game data:** the match IDs it needs and the analysis that comes back; shared game data such as hero statistics. These come
-  from the game-data services the app uses; only match IDs, hero IDs and your public Steam account number are involved.
+- **Sign-in:** through Steam (Steam's own page; your password never reaches the app). The service learns your public account number and gives the app a key that identifies that installation; you can sign out to revoke it.
+- **Match and game data:** the app asks the Immortal+ service for your match history, profile and replay analysis, and for shared game data
+  such as hero statistics. The service gets them from game-data services on the app's behalf. Only your public Steam account number, match IDs and
+  hero IDs are involved. Your match history is stored on your PC; the service keeps only who may use it.
+- **Keys:** the app holds no keys for those services. If you add your own Steam Web API key (optional, for faster match detection) or an AI service key
+  (optional), they stay on your PC and are used only from your PC.
 - **Updates:** the app downloads new versions from this repository's releases.
 
 It does **not** upload: screenshots, the screen reader's facts, the live game feed, your keystrokes, your file list, or anything about other
